@@ -21,7 +21,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.x'
+          dotnet-version: "10.x"
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -47,9 +47,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v1.6.0
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_89E011FA061E4DC6A227347EC6078A71 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6CDAA104627D470985E458C00B6438AE }}
@@ -59,7 +59,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'BathroomTracker'
-          slot-name: 'Production'
+          app-name: "BathroomTracker"
+          slot-name: "Production"
           package: .
-          
