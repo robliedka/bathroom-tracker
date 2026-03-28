@@ -118,6 +118,18 @@ app.UseCors("web");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", () =>
+{
+    return Results.Ok(new
+    {
+        service = "BathroomWatch.Api",
+        status = "ok",
+        timeUtc = DateTimeOffset.UtcNow
+    });
+});
+
+app.MapGet("/healthz", () => Results.Ok(new { status = "ok" }));
+
 app.MapAuthEndpoints();
 app.MapBathroomEndpoints();
 app.MapHub<UpdatesHub>("/hubs/updates");
