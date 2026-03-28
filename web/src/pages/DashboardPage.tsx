@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { BathroomReport, BathroomSummary } from '../types';
+import type { BathroomReport, BathroomSummary, GamificationMe } from '../types';
 import { api } from '../lib/api';
 import { authStore } from '../lib/auth';
 import { createHubConnection } from '../lib/signalr';
@@ -23,6 +23,7 @@ type Props = {
 
 export function DashboardPage({ token, name, onSignOut }: Props) {
   const [bathrooms, setBathrooms] = useState<BathroomSummary[]>([]);
+  const [gamification, setGamification] = useState<GamificationMe | null>(null);
   const [newBathroomName, setNewBathroomName] = useState('');
   const [newBathroomLocation, setNewBathroomLocation] = useState('');
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -56,6 +57,11 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
     setBathrooms(list);
   }
 
+  async function refreshGamification() {
+    const me = await api.gamificationMe(token);
+    setGamification(me);
+  }
+
   async function createBathroom(event: React.FormEvent) {
     event.preventDefault();
 
@@ -82,6 +88,7 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
     await api.report(token, bathroomId, { status, notes });
     delete reportsCacheRef.current[bathroomId];
     await refresh();
+    await refreshGamification();
   }
 
   async function toggleSubscription(bathroomId: string, subscribe: boolean) {
@@ -165,6 +172,7 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
 
   useEffect(() => {
     refresh().catch((error: Error) => toast(error.message));
+    refreshGamification().catch((error: Error) => toast(error.message));
   }, [token]);
 
   useEffect(() => {
@@ -244,6 +252,8 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
           <div className="head-meta">
             <span>{bathrooms.length} Bathrooms</span>
             <span>SignalR Live Feed</span>
+            {gamification && <span>Level {gamification.level} {gamification.levelName}</span>}
+            {gamification && <span>Rank #{gamification.rank}</span>}
           </div>
         </div>
         <div className="dashboard-head-actions">

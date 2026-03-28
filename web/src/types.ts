@@ -29,3 +29,12 @@ export type BathroomReport = {
   createdAtUtc: string;
   reporterName: string;
 };
+
+export type GamificationMe = {
+  points: number;
+  level: number;
+  levelName: string;
+  nextLevelPoints: number;
+  rank: number;
+  totalUsers: number;
+};

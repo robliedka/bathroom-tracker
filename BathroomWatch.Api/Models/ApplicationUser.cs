@@ -5,4 +5,5 @@ namespace BathroomWatch.Api.Models;
 public class ApplicationUser : IdentityUser
 {
     public required string FullName { get; set; }
+    public int Points { get; set; }
 }

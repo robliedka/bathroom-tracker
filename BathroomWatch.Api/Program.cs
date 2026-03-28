@@ -72,6 +72,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<BathroomStatusService>();
+builder.Services.AddScoped<GamificationService>();
 builder.Services.AddHostedService<PredictionHostedService>();
 
 builder.Services.AddCors(options =>
@@ -132,6 +133,41 @@ app.MapGet("/api/me", (System.Security.Claims.ClaimsPrincipal principal) =>
     {
         name = principal.FindFirst("full_name")?.Value ?? principal.Identity?.Name,
         email = principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? principal.FindFirst("email")?.Value
+    });
+}).RequireAuthorization();
+
+app.MapGet("/api/gamification/me", async (
+    System.Security.Claims.ClaimsPrincipal principal,
+    AppDbContext db,
+    GamificationService gamification) =>
+{
+    var userId = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    if (string.IsNullOrWhiteSpace(userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+    if (user is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var status = gamification.GetStatus(user.Points);
+
+    // Dense rank: ties share the same rank.
+    var higherCount = await db.Users.AsNoTracking().CountAsync(u => u.Points > user.Points);
+    var totalUsers = await db.Users.AsNoTracking().CountAsync();
+    var rank = higherCount + 1;
+
+    return Results.Ok(new
+    {
+        points = status.Points,
+        level = status.Level,
+        levelName = status.LevelName,
+        nextLevelPoints = status.NextLevelPoints,
+        rank,
+        totalUsers
     });
 }).RequireAuthorization();
 

@@ -183,6 +183,15 @@ public static class BathroomEndpoints
         db.BathroomReports.Add(report);
         await db.SaveChangesAsync();
 
+        // Gamification: award points for contributing a report.
+        var pointsAwarded = 10;
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is not null)
+        {
+            user.Points += pointsAwarded;
+            await db.SaveChangesAsync();
+        }
+
         var windowStart = DateTimeOffset.UtcNow.AddHours(-24);
         var reports = await db.BathroomReports
             .AsNoTracking()

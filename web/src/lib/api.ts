@@ -1,4 +1,4 @@
-import type { AuthResponse, BathroomReport, BathroomSummary } from '../types';
+import type { AuthResponse, BathroomReport, BathroomSummary, GamificationMe } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5166';
 
@@ -43,6 +43,9 @@ export const api = {
   },
   me(token: string) {
     return request<{ name: string; email: string }>('/api/me', {}, token);
+  },
+  gamificationMe(token: string) {
+    return request<GamificationMe>('/api/gamification/me', {}, token);
   },
   getBathrooms(token: string) {
     return request<BathroomSummary[]>('/api/bathrooms', {}, token);

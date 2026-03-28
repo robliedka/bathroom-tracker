@@ -40,8 +40,16 @@ BEGIN
         [LockoutEnabled] bit NOT NULL CONSTRAINT [DF_AspNetUsers_LockoutEnabled] DEFAULT(0),
         [AccessFailedCount] int NOT NULL CONSTRAINT [DF_AspNetUsers_AccessFailedCount] DEFAULT(0),
         [FullName] nvarchar(max) NOT NULL,
+        [Points] int NOT NULL CONSTRAINT [DF_AspNetUsers_Points] DEFAULT(0),
         CONSTRAINT [PK_AspNetUsers] PRIMARY KEY ([Id])
     );
+END
+ELSE
+BEGIN
+    IF COL_LENGTH(N'[dbo].[AspNetUsers]', N'Points') IS NULL
+    BEGIN
+        ALTER TABLE [dbo].[AspNetUsers] ADD [Points] int NOT NULL CONSTRAINT [DF_AspNetUsers_Points] DEFAULT(0);
+    END
 END
 
 IF OBJECT_ID(N'[dbo].[AspNetRoleClaims]', N'U') IS NULL
@@ -178,4 +186,3 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_BathroomReports_Repor
 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_BathroomSubscriptions_UserId' AND object_id = OBJECT_ID(N'[dbo].[BathroomSubscriptions]'))
     CREATE INDEX [IX_BathroomSubscriptions_UserId] ON [dbo].[BathroomSubscriptions] ([UserId]);
-
