@@ -6,6 +6,7 @@ using BathroomWatch.Api.Models;
 using BathroomWatch.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -90,12 +91,40 @@ builder.Services.AddScoped<BathroomStatusService>();
 builder.Services.AddScoped<GamificationService>();
 builder.Services.AddHostedService<PredictionHostedService>();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Azure App Service acts as a reverse proxy; clearing these avoids having to hardcode proxy IPs.
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("web", policy =>
     {
+        // Supports:
+        // - JSON array in config: Cors:AllowedOrigins: ["https://...", ...]
+        // - Comma/semicolon-separated string in env: Cors__AllowedOrigins: "https://a,https://b"
         var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
-        policy.WithOrigins(origins)
+        if (origins.Length == 0)
+        {
+            var raw = builder.Configuration["Cors:AllowedOrigins"];
+            if (!string.IsNullOrWhiteSpace(raw))
+            {
+                origins = raw
+                    .Split([',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .ToArray();
+            }
+        }
+
+        var normalizedOrigins = origins
+            .Select(o => o.Trim().TrimEnd('/'))
+            .Where(o => !string.IsNullOrWhiteSpace(o))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        policy.WithOrigins(normalizedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -130,6 +159,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseCors("web");
 app.UseAuthentication();
