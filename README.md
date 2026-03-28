@@ -42,12 +42,15 @@ API will be available at `http://localhost:5166`.
 
 ```bash
 cd web
-cp .env.example .env
 npm install
 npm run dev
 ```
 
 Frontend runs at `http://localhost:5173`.
+
+Vite environment routing:
+- Local dev uses `web/.env.development` (points at `http://localhost:5166`).
+- Production builds (Azure Static Web Apps) use `web/.env.production` (points at your Azure API).
 
 ## Backend API Overview
 
