@@ -3,7 +3,7 @@
 Crowd-sourced bathroom availability tracker using:
 - React + TypeScript frontend (deploy to Azure Static Web Apps)
 - .NET Web API + SignalR backend (deploy to Azure Container Apps)
-- Azure Database for PostgreSQL
+- Azure SQL Database
 
 ## Features Implemented
 
@@ -30,10 +30,10 @@ Crowd-sourced bathroom availability tracker using:
 
 ## Run Locally
 
-### 1) Start PostgreSQL + API
+### 1) Start SQL Server (local) + API
 
 ```bash
-docker compose up -d postgres api
+docker compose up -d mssql api
 ```
 
 API will be available at `http://localhost:5166`.
@@ -70,12 +70,12 @@ Frontend runs at `http://localhost:5173`.
 1. Build and push API image to ACR.
 2. Create Container App with ingress enabled.
 3. Set environment variables on Container App:
-   - `ConnectionStrings__Postgres`
+   - `ConnectionStrings__SqlServer`
    - `Jwt__Issuer`
    - `Jwt__Audience`
    - `Jwt__SigningKey`
    - `Cors__AllowedOrigins__0` (your Static Web App URL)
-4. Point PostgreSQL connection string to Azure Database for PostgreSQL Flexible Server.
+4. Point the SQL Server connection string to Azure SQL Database.
 
 ### Frontend: Azure Static Web Apps
 

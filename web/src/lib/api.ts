@@ -62,6 +62,9 @@ export const api = {
       body: JSON.stringify(payload),
     }, token);
   },
+  getReports(token: string, bathroomId: string, hours = 24) {
+    return request<BathroomReport[]>(`/api/bathrooms/${bathroomId}/reports?hours=${hours}`, {}, token);
+  },
   subscribe(token: string, bathroomId: string) {
     return request<void>(`/api/bathrooms/${bathroomId}/subscribe`, { method: 'POST' }, token);
   },

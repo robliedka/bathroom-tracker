@@ -17,7 +17,9 @@ var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("SqlServer"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure());
 });
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>

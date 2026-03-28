@@ -343,11 +343,123 @@ button.ghost {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  position: relative;
 }
 
 .sub-btn {
   background: transparent;
   color: var(--accent);
+}
+
+.reports-btn {
+  background: transparent;
+  border-color: rgba(47, 227, 110, 0.35);
+  color: rgba(203, 255, 228, 0.95);
+}
+
+.reports-btn:hover {
+  border-color: rgba(47, 227, 110, 0.85);
+  background: rgba(47, 227, 110, 0.08);
+}
+
+.reports-popover {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  width: min(340px, calc(100vw - 2.2rem));
+  border-radius: 14px;
+  border: 1px solid rgba(30, 58, 43, 0.95);
+  background: rgba(5, 6, 7, 0.96);
+  padding: 0.65rem;
+  box-shadow: 0 18px 56px rgba(0, 0, 0, 0.55);
+  z-index: 30;
+}
+
+.reports-popover::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: rgba(5, 6, 7, 0.96);
+  border-right: 1px solid rgba(30, 58, 43, 0.95);
+  border-bottom: 1px solid rgba(30, 58, 43, 0.95);
+  transform: rotate(45deg);
+}
+
+.reports-title {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(152, 181, 164, 0.92);
+  font-weight: 900;
+  margin: 0.1rem 0.1rem 0.55rem;
+}
+
+.reports-muted {
+  color: rgba(152, 181, 164, 0.92);
+  font-size: 0.9rem;
+  padding: 0.15rem 0.1rem 0.1rem;
+}
+
+.reports-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.reports-item {
+  border: 1px solid rgba(30, 58, 43, 0.75);
+  background: rgba(11, 15, 13, 0.65);
+  border-radius: 12px;
+  padding: 0.6rem 0.65rem;
+}
+
+.reports-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.reports-time {
+  color: rgba(152, 181, 164, 0.92);
+  font-size: 0.82rem;
+}
+
+.reports-who {
+  margin-top: 0.35rem;
+  color: rgba(233, 247, 239, 0.92);
+  font-size: 0.9rem;
+}
+
+.reports-notes {
+  margin-top: 0.35rem;
+  color: rgba(152, 181, 164, 0.92);
+  font-size: 0.88rem;
+}
+
+.reports-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.reports-pill-bad {
+  border: 1px solid rgba(240, 103, 103, 0.7);
+  background: rgba(240, 103, 103, 0.12);
+  color: #ffb7b7;
+}
+
+.reports-pill-good {
+  border: 1px solid rgba(47, 227, 110, 0.55);
+  background: rgba(47, 227, 110, 0.1);
+  color: rgba(203, 255, 228, 0.95);
 }
 
 .danger-btn {
@@ -415,6 +527,20 @@ button.ghost {
   font-weight: 800;
 }
 
+.modal-body {
+  padding: 0 0.15rem 0.35rem;
+  color: rgba(233, 247, 239, 0.95);
+}
+
+.modal-body p {
+  margin: 0 0 0.45rem;
+}
+
+.modal-muted {
+  color: rgba(152, 181, 164, 0.9);
+  font-size: 0.9rem;
+}
+
 .modal-form {
   display: grid;
   gap: 0.6rem;
@@ -425,6 +551,76 @@ button.ghost {
   justify-content: flex-end;
   gap: 0.5rem;
   margin-top: 0.3rem;
+}
+
+.modal-danger-btn {
+  border-color: rgba(240, 103, 103, 0.75);
+  background: linear-gradient(180deg, rgba(240, 103, 103, 0.95) 0%, rgba(219, 72, 72, 0.95) 100%);
+  color: #120303;
+}
+
+.modal-danger-btn:hover {
+  border-color: rgba(240, 103, 103, 1);
+}
+
+.report-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
+}
+
+.report-item {
+  border: 1px solid rgba(30, 58, 43, 0.75);
+  background: rgba(5, 6, 7, 0.35);
+  border-radius: 12px;
+  padding: 0.65rem 0.7rem;
+}
+
+.report-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.report-time {
+  color: rgba(152, 181, 164, 0.92);
+  font-size: 0.85rem;
+}
+
+.report-who {
+  margin-top: 0.35rem;
+  color: rgba(233, 247, 239, 0.92);
+  font-size: 0.92rem;
+}
+
+.report-notes {
+  margin-top: 0.35rem;
+  color: rgba(152, 181, 164, 0.92);
+  font-size: 0.9rem;
+}
+
+.report-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.report-pill-bad {
+  border: 1px solid rgba(240, 103, 103, 0.7);
+  background: rgba(240, 103, 103, 0.12);
+  color: #ffb7b7;
+}
+
+.report-pill-good {
+  border: 1px solid rgba(47, 227, 110, 0.55);
+  background: rgba(47, 227, 110, 0.1);
+  color: rgba(203, 255, 228, 0.95);
 }
 
 .settings-backdrop {

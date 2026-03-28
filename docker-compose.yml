@@ -1,14 +1,14 @@
 services:
-  postgres:
-    image: postgres:16
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      POSTGRES_DB: bathroomwatch
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
     ports:
-      - "5432:5432"
+      - "1433:1433"
+    ports:
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - sqldata:/var/opt/mssql
 
   api:
     build:
@@ -16,7 +16,7 @@ services:
       dockerfile: BathroomWatch.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=bathroomwatch;Username=postgres;Password=postgres
+      ConnectionStrings__SqlServer: Server=mssql;Database=bathroomwatch;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;Encrypt=False
       Jwt__Issuer: BathroomWatch.Api
       Jwt__Audience: BathroomWatch.Web
       Jwt__SigningKey: dev-key-change-this-to-a-long-secret-value
@@ -24,7 +24,7 @@ services:
     ports:
       - "5166:8080"
     depends_on:
-      - postgres
+      - mssql
 
 volumes:
-  pgdata:
+  sqldata:
