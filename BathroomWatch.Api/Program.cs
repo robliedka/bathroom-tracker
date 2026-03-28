@@ -15,10 +15,16 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSett
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
                   ?? throw new InvalidOperationException("Jwt settings are missing.");
 
+var sqlConnectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION");
+if (string.IsNullOrWhiteSpace(sqlConnectionString))
+{
+    throw new InvalidOperationException("Missing required environment variable: ConnectionStrings__SqlServer");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("SqlServer"),
+        sqlConnectionString,
         sqlOptions => sqlOptions.EnableRetryOnFailure());
 });
 
