@@ -15,10 +15,19 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSett
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
                   ?? throw new InvalidOperationException("Jwt settings are missing.");
 
-var sqlConnectionString = Environment.GetEnvironmentVariable("SQL_CONNECTION");
+// Prefer .NET configuration so Azure App Service "Connection strings" and env vars both work.
+// Supported:
+// - App Service Connection string named "SqlServer" (recommended)
+// - Environment variable "ConnectionStrings__SqlServer"
+// - Environment variable "SQL_CONNECTION" (legacy)
+var sqlConnectionString =
+    builder.Configuration.GetConnectionString("SqlServer")
+    ?? Environment.GetEnvironmentVariable("ConnectionStrings__SqlServer")
+    ?? Environment.GetEnvironmentVariable("SQL_CONNECTION");
 if (string.IsNullOrWhiteSpace(sqlConnectionString))
 {
-    throw new InvalidOperationException("Missing required environment variable: ConnectionStrings__SqlServer");
+    throw new InvalidOperationException(
+        "Missing SQL connection string. Set App Service Connection string 'SqlServer' or env var 'ConnectionStrings__SqlServer' (or 'SQL_CONNECTION').");
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -97,8 +106,10 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+// Keep dev convenience only. In Azure, use migrations or run the provided schema script.
+if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.EnsureCreatedAsync();
 
