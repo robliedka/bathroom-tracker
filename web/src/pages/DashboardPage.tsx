@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { BathroomReport, BathroomSummary, GamificationMe } from '../types';
-import { api } from '../lib/api';
-import { authStore } from '../lib/auth';
-import { createHubConnection } from '../lib/signalr';
-import { BathroomTile } from '../components/BathroomTile';
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { BathroomReport, BathroomSummary, GamificationMe } from "../types";
+import { api } from "../lib/api";
+import { authStore } from "../lib/auth";
+import { createHubConnection } from "../lib/signalr";
+import { BathroomTile } from "../components/BathroomTile";
 
 type Toast = {
   id: number;
@@ -24,8 +24,8 @@ type Props = {
 export function DashboardPage({ token, name, onSignOut }: Props) {
   const [bathrooms, setBathrooms] = useState<BathroomSummary[]>([]);
   const [gamification, setGamification] = useState<GamificationMe | null>(null);
-  const [newBathroomName, setNewBathroomName] = useState('');
-  const [newBathroomLocation, setNewBathroomLocation] = useState('');
+  const [newBathroomName, setNewBathroomName] = useState("");
+  const [newBathroomLocation, setNewBathroomLocation] = useState("");
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -35,11 +35,13 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
   const deleteConfirmRef = useRef<HTMLButtonElement | null>(null);
   const reportsCacheRef = useRef<Record<string, BathroomReport[]>>({});
-  const reportsInFlightRef = useRef<Map<string, Promise<BathroomReport[]>>>(new Map());
+  const reportsInFlightRef = useRef<Map<string, Promise<BathroomReport[]>>>(
+    new Map(),
+  );
 
   const firstFour = useMemo(() => bathrooms.slice(0, 4), [bathrooms]);
   const firstName = useMemo(() => {
-    const raw = (name ?? authStore.getName() ?? '').trim();
+    const raw = (name ?? authStore.getName() ?? "").trim();
     if (!raw) return null;
     return raw.split(/\s+/)[0] ?? null;
   }, [name]);
@@ -70,8 +72,8 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
       location: newBathroomLocation,
     });
 
-    setNewBathroomName('');
-    setNewBathroomLocation('');
+    setNewBathroomName("");
+    setNewBathroomLocation("");
     await refresh();
   }
 
@@ -84,7 +86,11 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
     }
   }
 
-  async function report(bathroomId: string, status: 'available' | 'unavailable', notes?: string) {
+  async function report(
+    bathroomId: string,
+    status: "available" | "unavailable",
+    notes?: string,
+  ) {
     await api.report(token, bathroomId, { status, notes });
     delete reportsCacheRef.current[bathroomId];
     await refresh();
@@ -94,10 +100,10 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
   async function toggleSubscription(bathroomId: string, subscribe: boolean) {
     if (subscribe) {
       await api.subscribe(token, bathroomId);
-      toast('Subscribed to bathroom alerts.');
+      toast("Subscribed to bathroom alerts.");
     } else {
       await api.unsubscribe(token, bathroomId);
-      toast('Unsubscribed from bathroom alerts.');
+      toast("Unsubscribed from bathroom alerts.");
     }
     await refresh();
   }
@@ -106,7 +112,7 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
     const bathroom = bathrooms.find((b) => b.id === bathroomId);
     setDeleteTarget({
       id: bathroomId,
-      name: bathroom?.name ?? 'this bathroom',
+      name: bathroom?.name ?? "this bathroom",
     });
     setDeleteOpen(true);
   }
@@ -116,7 +122,7 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
     setDeleteBusy(true);
     try {
       await api.deleteBathroom(token, deleteTarget.id);
-      toast('Bathroom deleted.');
+      toast("Bathroom deleted.");
       delete reportsCacheRef.current[deleteTarget.id];
       setDeleteOpen(false);
       setDeleteTarget(null);
@@ -150,22 +156,22 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
   }
 
   function enableDesktopNotifications() {
-    if (!('Notification' in window)) {
-      toast('Desktop notifications are not supported in this browser.');
+    if (!("Notification" in window)) {
+      toast("Desktop notifications are not supported in this browser.");
       return;
     }
 
     Notification.requestPermission().then((permission) => {
-      if (permission === 'granted') {
-        toast('Desktop notifications enabled.');
+      if (permission === "granted") {
+        toast("Desktop notifications enabled.");
       } else {
-        toast('Notification permission was not granted.');
+        toast("Notification permission was not granted.");
       }
     });
   }
 
   function showDesktopNotification(title: string, body: string) {
-    if ('Notification' in window && Notification.permission === 'granted') {
+    if ("Notification" in window && Notification.permission === "granted") {
       new Notification(title, { body });
     }
   }
@@ -178,27 +184,40 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
   useEffect(() => {
     const hub = createHubConnection(token);
 
-    hub.on('BathroomUpdated', () => {
+    hub.on("BathroomUpdated", () => {
       reportsCacheRef.current = {};
       refresh().catch((error: Error) => toast(error.message));
     });
 
-    hub.on('BathroomReportNotification', (payload: { message: string; bathroomName: string }) => {
-      toast(payload.message);
-      showDesktopNotification('Bathroom Update', payload.message);
-    });
+    hub.on(
+      "BathroomReportNotification",
+      (payload: { message: string; bathroomName: string }) => {
+        toast(payload.message);
+        showDesktopNotification("Bathroom Update", payload.message);
+      },
+    );
 
-    hub.on('BathroomPrediction', (payload: { message: string; bathroomName: string; probabilityUnavailable: number }) => {
-      const msg = `${payload.message} (${Math.round(payload.probabilityUnavailable * 100)}% chance)`;
-      toast(msg);
-      showDesktopNotification('Availability Prediction', msg);
-    });
+    hub.on(
+      "BathroomPrediction",
+      (payload: {
+        message: string;
+        bathroomName: string;
+        probabilityUnavailable: number;
+      }) => {
+        const msg = `${payload.message} (${Math.round(payload.probabilityUnavailable * 100)}% chance)`;
+        toast(msg);
+        showDesktopNotification("Availability Prediction", msg);
+      },
+    );
 
-    hub.on('BathroomDeleted', (payload: { bathroomId: string; bathroomName: string }) => {
-      delete reportsCacheRef.current[payload.bathroomId];
-      toast(`${payload.bathroomName} was deleted.`);
-      refresh().catch((error: Error) => toast(error.message));
-    });
+    hub.on(
+      "BathroomDeleted",
+      (payload: { bathroomId: string; bathroomName: string }) => {
+        delete reportsCacheRef.current[payload.bathroomId];
+        toast(`${payload.bathroomName} was deleted.`);
+        refresh().catch((error: Error) => toast(error.message));
+      },
+    );
 
     hub.start().catch((error: Error) => toast(error.message));
 
@@ -210,36 +229,36 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
   useEffect(() => {
     if (!settingsOpen) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setSettingsOpen(false);
       }
     }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [settingsOpen]);
 
   useEffect(() => {
     if (!createOpen) return;
     createNameRef.current?.focus();
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setCreateOpen(false);
       }
     }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [createOpen]);
 
   useEffect(() => {
     if (!deleteOpen) return;
     deleteConfirmRef.current?.focus();
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setDeleteOpen(false);
       }
     }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [deleteOpen]);
 
   return (
@@ -247,17 +266,26 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
       <header className="dashboard-head">
         <div className="dashboard-head-main">
           <span className="head-eyebrow">Live Operations</span>
-          <h1>Bathroom Watch Dashboard</h1>
-          <p>Welcome {firstName ?? 'friend'}. Track crowd-sourced bathroom availability in real time.</p>
+          <h1>Bathroom Reports</h1>
+          <p>Welcome {firstName ?? "friend"}.</p>
           <div className="head-meta">
             <span>{bathrooms.length} Bathrooms</span>
             <span>SignalR Live Feed</span>
-            {gamification && <span>Level {gamification.level} {gamification.levelName}</span>}
+            {gamification && (
+              <span>
+                Level {gamification.level} {gamification.levelName}
+              </span>
+            )}
             {gamification && <span>Rank #{gamification.rank}</span>}
           </div>
         </div>
         <div className="dashboard-head-actions">
-          <button className="header-create-btn" onClick={() => setCreateOpen(true)}>Create bathroom</button>
+          <button
+            className="header-create-btn"
+            onClick={() => setCreateOpen(true)}
+          >
+            Create bathroom
+          </button>
         </div>
       </header>
 
@@ -276,17 +304,28 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
 
       {bathrooms.length > 4 && (
         <section className="overflow-note">
-          <p>Showing first 4 bathrooms on dashboard. {bathrooms.length - 4} additional bathrooms are in the system.</p>
+          <p>
+            Showing first 4 bathrooms on dashboard. {bathrooms.length - 4}{" "}
+            additional bathrooms are in the system.
+          </p>
         </section>
       )}
 
       <aside className="toasts">
         {toasts.map((item) => (
-          <div key={item.id} className="toast">{item.text}</div>
+          <div key={item.id} className="toast">
+            {item.text}
+          </div>
         ))}
       </aside>
 
-      {createOpen && <button className="modal-backdrop" onClick={() => setCreateOpen(false)} aria-label="Close create bathroom dialog" />}
+      {createOpen && (
+        <button
+          className="modal-backdrop"
+          onClick={() => setCreateOpen(false)}
+          aria-label="Close create bathroom dialog"
+        />
+      )}
       {createOpen && (
         <div className="modal-panel" role="dialog" aria-label="Create bathroom">
           <div className="modal-title">Create bathroom</div>
@@ -304,25 +343,46 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
               placeholder="Location (optional)"
             />
             <div className="modal-actions">
-              <button type="button" className="ghost" onClick={() => setCreateOpen(false)}>Cancel</button>
+              <button
+                type="button"
+                className="ghost"
+                onClick={() => setCreateOpen(false)}
+              >
+                Cancel
+              </button>
               <button type="submit">Create</button>
             </div>
           </form>
         </div>
       )}
 
-      {deleteOpen && <button className="modal-backdrop" onClick={() => setDeleteOpen(false)} aria-label="Close delete bathroom dialog" />}
+      {deleteOpen && (
+        <button
+          className="modal-backdrop"
+          onClick={() => setDeleteOpen(false)}
+          aria-label="Close delete bathroom dialog"
+        />
+      )}
       {deleteOpen && (
         <div className="modal-panel" role="dialog" aria-label="Delete bathroom">
           <div className="modal-title">Delete bathroom</div>
           <div className="modal-body">
             <p>
-              Delete <strong>{deleteTarget?.name ?? 'this bathroom'}</strong>?
+              Delete <strong>{deleteTarget?.name ?? "this bathroom"}</strong>?
             </p>
-            <p className="modal-muted">This will remove its report history and subscriptions.</p>
+            <p className="modal-muted">
+              This will remove its report history and subscriptions.
+            </p>
           </div>
           <div className="modal-actions">
-            <button type="button" className="ghost" onClick={() => setDeleteOpen(false)} disabled={deleteBusy}>Cancel</button>
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteBusy}
+            >
+              Cancel
+            </button>
             <button
               ref={deleteConfirmRef}
               type="button"
@@ -336,7 +396,13 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
         </div>
       )}
 
-      {settingsOpen && <button className="settings-backdrop" onClick={() => setSettingsOpen(false)} aria-label="Close settings" />}
+      {settingsOpen && (
+        <button
+          className="settings-backdrop"
+          onClick={() => setSettingsOpen(false)}
+          aria-label="Close settings"
+        />
+      )}
 
       <div className="settings-fab">
         <button

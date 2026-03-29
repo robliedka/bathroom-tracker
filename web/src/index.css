@@ -4,9 +4,9 @@
   --bg: #050607;
   --paper: #0b0f0d;
   --ink: #e9f7ef;
-  --muted: #98b5a4;
-  --accent: #2fe36e;
-  --line: #1e3a2b;
+  --muted: #c6a48c;
+  --accent: #ff8a2a;
+  --line: #4a2b16;
   --good: #2fe36e;
   --warn: #f5bc4f;
   --bad: #f06767;
@@ -16,17 +16,23 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  min-height: 100vh;
   font-family: 'Roboto', 'Segoe UI', sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at 18% 18%, rgba(47, 227, 110, 0.16) 0%, transparent 38%),
-    radial-gradient(circle at 85% 82%, rgba(18, 78, 42, 0.35) 0%, transparent 42%),
+    radial-gradient(circle at 18% 18%, rgba(255, 138, 42, 0.18) 0%, transparent 38%),
+    radial-gradient(circle at 85% 82%, rgba(120, 52, 18, 0.38) 0%, transparent 42%),
     var(--bg);
   background-repeat: no-repeat;
   background-position: left top, right bottom, left top;
-  background-size: 1200px 1200px, 1400px 1400px, auto;
+  background-size: 160vmax 160vmax, 180vmax 180vmax, auto;
 }
 
 button,
@@ -70,7 +76,7 @@ input {
 
 button {
   border: 1px solid var(--accent);
-  background: linear-gradient(180deg, #3cff84 0%, #2fe36e 100%);
+  background: linear-gradient(180deg, #ffb04a 0%, #ff8a2a 100%);
   color: #fff;
   border-radius: 8px;
   padding: 0.65rem 0.8rem;
@@ -116,13 +122,13 @@ button.ghost {
 .header-create-btn {
   border-radius: 999px;
   padding: 0.6rem 0.95rem;
-  border-color: rgba(47, 227, 110, 0.65);
-  background: radial-gradient(circle at 30% 30%, rgba(60, 255, 132, 0.8), rgba(47, 227, 110, 0.16));
+  border-color: rgba(255, 138, 42, 0.7);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 176, 74, 0.82), rgba(255, 138, 42, 0.18));
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
 }
 
 .header-create-btn:hover {
-  border-color: rgba(47, 227, 110, 0.95);
+  border-color: rgba(255, 138, 42, 0.95);
 }
 
 .head-eyebrow {
@@ -130,7 +136,7 @@ button.ghost {
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: rgba(122, 255, 182, 0.95);
+  color: rgba(255, 176, 74, 0.95);
 }
 
 .dashboard-head h1 {
@@ -152,9 +158,9 @@ button.ghost {
 }
 
 .head-meta span {
-  border: 1px solid rgba(47, 227, 110, 0.3);
-  color: rgba(203, 255, 228, 0.95);
-  background: rgba(47, 227, 110, 0.1);
+  border: 1px solid rgba(255, 138, 42, 0.35);
+  color: rgba(255, 226, 204, 0.96);
+  background: rgba(255, 138, 42, 0.12);
   border-radius: 999px;
   padding: 0.24rem 0.62rem;
   font-size: 0.76rem;
@@ -236,8 +242,8 @@ button.ghost {
 }
 
 .chart-bar-total {
-  fill: rgba(47, 227, 110, 0.18);
-  stroke: rgba(47, 227, 110, 0.28);
+  fill: rgba(255, 138, 42, 0.18);
+  stroke: rgba(255, 138, 42, 0.28);
   stroke-width: 1;
 }
 
@@ -269,7 +275,7 @@ button.ghost {
   top: 0.2rem;
   transform: translateX(-50%);
   background: rgba(5, 6, 7, 0.92);
-  border: 1px solid rgba(30, 58, 43, 0.95);
+  border: 1px solid rgba(74, 43, 22, 0.95);
   border-radius: 10px;
   padding: 0.5rem 0.6rem;
   min-width: 150px;
@@ -310,9 +316,9 @@ button.ghost {
 }
 
 .chart-pill-total {
-  border: 1px solid rgba(47, 227, 110, 0.55);
-  background: rgba(47, 227, 110, 0.1);
-  color: rgba(203, 255, 228, 0.95);
+  border: 1px solid rgba(255, 138, 42, 0.55);
+  background: rgba(255, 138, 42, 0.12);
+  color: rgba(255, 226, 204, 0.96);
 }
 
 .tile-actions {
@@ -356,13 +362,13 @@ button.ghost {
 
 .reports-btn {
   background: transparent;
-  border-color: rgba(47, 227, 110, 0.35);
-  color: rgba(203, 255, 228, 0.95);
+  border-color: rgba(255, 138, 42, 0.45);
+  color: rgba(255, 226, 204, 0.96);
 }
 
 .reports-btn:hover {
-  border-color: rgba(47, 227, 110, 0.85);
-  background: rgba(47, 227, 110, 0.08);
+  border-color: rgba(255, 138, 42, 0.9);
+  background: rgba(255, 138, 42, 0.1);
 }
 
 .reports-popover {
@@ -371,7 +377,7 @@ button.ghost {
   bottom: calc(100% + 10px);
   width: min(340px, calc(100vw - 2.2rem));
   border-radius: 14px;
-  border: 1px solid rgba(30, 58, 43, 0.95);
+  border: 1px solid rgba(74, 43, 22, 0.95);
   background: rgba(5, 6, 7, 0.96);
   padding: 0.65rem;
   box-shadow: 0 18px 56px rgba(0, 0, 0, 0.55);
@@ -386,8 +392,8 @@ button.ghost {
   width: 12px;
   height: 12px;
   background: rgba(5, 6, 7, 0.96);
-  border-right: 1px solid rgba(30, 58, 43, 0.95);
-  border-bottom: 1px solid rgba(30, 58, 43, 0.95);
+  border-right: 1px solid rgba(74, 43, 22, 0.95);
+  border-bottom: 1px solid rgba(74, 43, 22, 0.95);
   transform: rotate(45deg);
 }
 
@@ -412,7 +418,7 @@ button.ghost {
 }
 
 .reports-item {
-  border: 1px solid rgba(30, 58, 43, 0.75);
+  border: 1px solid rgba(74, 43, 22, 0.75);
   background: rgba(11, 15, 13, 0.65);
   border-radius: 12px;
   padding: 0.6rem 0.65rem;
@@ -492,7 +498,7 @@ button.ghost {
 
 .toast {
   background: rgba(11, 15, 13, 0.95);
-  border: 1px solid rgba(47, 227, 110, 0.28);
+  border: 1px solid rgba(255, 138, 42, 0.28);
   color: #fff;
   border-radius: 8px;
   padding: 0.6rem 0.75rem;
@@ -514,7 +520,7 @@ button.ghost {
   transform: translate(-50%, -50%);
   width: min(520px, calc(100% - 2rem));
   border-radius: 16px;
-  border: 1px solid rgba(30, 58, 43, 0.95);
+  border: 1px solid rgba(74, 43, 22, 0.95);
   background: linear-gradient(160deg, rgba(11, 15, 13, 0.98), rgba(7, 10, 8, 0.98));
   padding: 1rem;
   box-shadow: 0 18px 56px rgba(0, 0, 0, 0.55);
@@ -648,14 +654,14 @@ button.ghost {
   padding: 0;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(47, 227, 110, 0.35);
-  background: radial-gradient(circle at 30% 30%, rgba(60, 255, 132, 0.35), rgba(47, 227, 110, 0.1));
-  color: rgba(223, 255, 240, 0.95);
+  border: 1px solid rgba(255, 138, 42, 0.45);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 176, 74, 0.35), rgba(255, 138, 42, 0.1));
+  color: rgba(255, 239, 226, 0.96);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
 }
 
 .gear-btn:hover {
-  border-color: rgba(47, 227, 110, 0.85);
+  border-color: rgba(255, 138, 42, 0.9);
 }
 
 .settings-panel {
@@ -664,7 +670,7 @@ button.ghost {
   bottom: 56px;
   width: 260px;
   border-radius: 14px;
-  border: 1px solid rgba(30, 58, 43, 0.95);
+  border: 1px solid rgba(74, 43, 22, 0.95);
   background: linear-gradient(160deg, rgba(11, 15, 13, 0.98), rgba(7, 10, 8, 0.98));
   padding: 0.65rem;
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
@@ -684,15 +690,15 @@ button.ghost {
   text-align: left;
   padding: 0.6rem 0.7rem;
   border-radius: 10px;
-  border: 1px solid rgba(30, 58, 43, 0.85);
+  border: 1px solid rgba(74, 43, 22, 0.85);
   background: rgba(5, 6, 7, 0.35);
   color: rgba(233, 247, 239, 0.95);
   margin-bottom: 0.45rem;
 }
 
 .settings-item:hover {
-  border-color: rgba(47, 227, 110, 0.95);
-  background: rgba(47, 227, 110, 0.1);
+  border-color: rgba(255, 138, 42, 0.95);
+  background: rgba(255, 138, 42, 0.12);
 }
 
 .settings-item.danger {

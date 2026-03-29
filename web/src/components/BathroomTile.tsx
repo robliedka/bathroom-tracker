@@ -128,7 +128,7 @@ export function BathroomTile({ bathroom, onReport, onToggleSubscription, onViewR
                 <div className="reports-muted">No recent reports.</div>
               ) : (
                 <div className="reports-list">
-                  {reports.map((report) => (
+                  {[...reports].reverse().map((report) => (
                     <div key={report.id} className="reports-item">
                       <div className="reports-item-head">
                         <span className={report.status === 'unavailable' ? 'reports-pill reports-pill-bad' : 'reports-pill reports-pill-good'}>
