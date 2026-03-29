@@ -6,6 +6,8 @@ export function createHubConnection(token: string) {
   return new signalR.HubConnectionBuilder()
     .withUrl(HUB_URL, {
       accessTokenFactory: () => token,
+      // We use bearer tokens (not cookies). Avoid CORS credential requirements cross-origin.
+      withCredentials: false,
     })
     .withAutomaticReconnect()
     .build();

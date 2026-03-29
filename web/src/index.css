@@ -24,6 +24,9 @@ body {
     radial-gradient(circle at 18% 18%, rgba(47, 227, 110, 0.16) 0%, transparent 38%),
     radial-gradient(circle at 85% 82%, rgba(18, 78, 42, 0.35) 0%, transparent 42%),
     var(--bg);
+  background-repeat: no-repeat;
+  background-position: left top, right bottom, left top;
+  background-size: 1200px 1200px, 1400px 1400px, auto;
 }
 
 button,
