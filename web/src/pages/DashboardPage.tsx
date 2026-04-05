@@ -284,7 +284,7 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
             className="header-create-btn"
             onClick={() => setCreateOpen(true)}
           >
-            Create bathroom
+            Create Bathroom
           </button>
         </div>
       </header>
