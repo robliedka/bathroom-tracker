@@ -2,13 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { api } from './lib/api';
 import { authStore } from './lib/auth';
+import { AdminPage } from './pages/AdminPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { LeaderboardPage } from './pages/LeaderboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 
 function useAuthState() {
   const [token, setToken] = useState<string | null>(authStore.getToken());
   const [name, setName] = useState<string | null>(authStore.getName());
+  const [roles, setRoles] = useState<string[]>(authStore.getRoles());
 
   useEffect(() => {
     function onStorage(event: StorageEvent) {
@@ -16,6 +19,7 @@ function useAuthState() {
       if (event.key.includes('bathroomwatch_')) {
         setToken(authStore.getToken());
         setName(authStore.getName());
+        setRoles(authStore.getRoles());
       }
     }
 
@@ -27,18 +31,22 @@ function useAuthState() {
     () => ({
       token,
       name,
-      setAuthed(nextToken: string, nextName: string, nextEmail: string) {
-        authStore.save(nextToken, nextName, nextEmail);
+      roles,
+      isAdmin: roles.map(r => r.toLowerCase()).includes('admin'),
+      setAuthed(nextToken: string, nextName: string, nextEmail: string, nextRoles: string[]) {
+        authStore.save(nextToken, nextName, nextEmail, nextRoles);
         setToken(nextToken);
         setName(nextName);
+        setRoles(nextRoles);
       },
       signOut() {
         authStore.clear();
         setToken(null);
         setName(null);
+        setRoles([]);
       },
     }),
-    [token, name],
+    [token, name, roles],
   );
 }
 
@@ -57,7 +65,7 @@ function RedirectIfAuthed({ token, children }: { token: string | null; children:
   return <>{children}</>;
 }
 
-function LoginRoute({ token, setAuthed }: { token: string | null; setAuthed: (t: string, n: string, e: string) => void }) {
+function LoginRoute({ token, setAuthed }: { token: string | null; setAuthed: (t: string, n: string, e: string, roles: string[]) => void }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -66,7 +74,7 @@ function LoginRoute({ token, setAuthed }: { token: string | null; setAuthed: (t:
       <LoginPage
         onSubmit={async ({ email, password }) => {
           const response = await api.login({ email, password });
-          setAuthed(response.accessToken, response.name, response.email);
+          setAuthed(response.accessToken, response.name, response.email, response.roles);
           const from = (location.state as { from?: string } | null)?.from;
           navigate(from || '/', { replace: true });
         }}
@@ -76,7 +84,7 @@ function LoginRoute({ token, setAuthed }: { token: string | null; setAuthed: (t:
   );
 }
 
-function RegisterRoute({ token, setAuthed }: { token: string | null; setAuthed: (t: string, n: string, e: string) => void }) {
+function RegisterRoute({ token, setAuthed }: { token: string | null; setAuthed: (t: string, n: string, e: string, roles: string[]) => void }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -85,7 +93,7 @@ function RegisterRoute({ token, setAuthed }: { token: string | null; setAuthed: 
       <RegisterPage
         onSubmit={async ({ name, email, password }) => {
           const response = await api.register({ name, email, password });
-          setAuthed(response.accessToken, response.name, response.email);
+          setAuthed(response.accessToken, response.name, response.email, response.roles);
           const from = (location.state as { from?: string } | null)?.from;
           navigate(from || '/', { replace: true });
         }}
@@ -120,8 +128,25 @@ export default function App() {
         }
       />
 
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth token={auth.token}>
+            {auth.isAdmin ? <AdminPage token={auth.token!} /> : <Navigate to="/" replace />}
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/leaderboard"
+        element={
+          <RequireAuth token={auth.token}>
+            <LeaderboardPage token={auth.token!} />
+          </RequireAuth>
+        }
+      />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
-

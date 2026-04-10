@@ -21,7 +21,7 @@ public class JwtTokenService(IOptions<JwtSettings> jwtOptions)
 {
     private readonly JwtSettings _jwt = jwtOptions.Value;
 
-    public string CreateToken(ApplicationUser user)
+    public string CreateToken(ApplicationUser user, IEnumerable<string> roles)
     {
         var claims = new List<Claim>
         {
@@ -31,6 +31,12 @@ public class JwtTokenService(IOptions<JwtSettings> jwtOptions)
             new(ClaimTypes.Name, user.FullName),
             new("full_name", user.FullName)
         };
+
+        foreach (var role in roles.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            // JwtBearer maps these to ClaimsIdentity.RoleClaimType.
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SigningKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

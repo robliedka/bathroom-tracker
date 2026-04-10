@@ -1,4 +1,7 @@
+using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
+using BathroomWatch.Api.Contracts;
 using BathroomWatch.Api.Data;
 using BathroomWatch.Api.Endpoints;
 using BathroomWatch.Api.Hubs;
@@ -7,6 +10,7 @@ using BathroomWatch.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -48,6 +52,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     options.Password.RequireNonAlphanumeric = false;
 })
 .AddSignInManager<SignInManager<ApplicationUser>>()
+.AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddAuthentication(options =>
@@ -131,6 +136,38 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = static async (context, token) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            message = "Rate limit exceeded. Max 5 reports per minute."
+        }, token);
+    };
+
+    options.AddPolicy("reports", httpContext =>
+    {
+        // Authenticated users are partitioned by user id; this is per-instance in memory.
+        var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                     ?? "anon";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: userId,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+});
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -164,6 +201,7 @@ app.UseHttpsRedirection();
 app.UseCors("web");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapGet("/", () =>
 {
@@ -179,19 +217,37 @@ app.MapGet("/healthz", () => Results.Ok(new { status = "ok" }));
 
 app.MapAuthEndpoints();
 app.MapBathroomEndpoints();
+app.MapAdminEndpoints();
 app.MapHub<UpdatesHub>("/hubs/updates");
 
-app.MapGet("/api/me", (System.Security.Claims.ClaimsPrincipal principal) =>
+app.MapGet("/api/me", async (
+    System.Security.Claims.ClaimsPrincipal principal,
+    UserManager<ApplicationUser> userManager) =>
 {
     if (!principal.Identity?.IsAuthenticated ?? true)
     {
         return Results.Unauthorized();
     }
 
+    var userId = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    if (string.IsNullOrWhiteSpace(userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var user = await userManager.FindByIdAsync(userId);
+    if (user is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    var roles = await userManager.GetRolesAsync(user);
+
     return Results.Ok(new
     {
-        name = principal.FindFirst("full_name")?.Value ?? principal.Identity?.Name,
-        email = principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? principal.FindFirst("email")?.Value
+        name = user.FullName,
+        email = user.Email,
+        roles = roles.OrderBy(r => r).ToArray()
     });
 }).RequireAuthorization();
 
@@ -228,6 +284,49 @@ app.MapGet("/api/gamification/me", async (
         rank,
         totalUsers
     });
+}).RequireAuthorization();
+
+app.MapGet("/api/gamification/leaderboard", async (
+    AppDbContext db,
+    GamificationService gamification,
+    int take = 25) =>
+{
+    take = Math.Clamp(take, 1, 100);
+
+    var users = await db.Users
+        .AsNoTracking()
+        .OrderByDescending(u => u.Points)
+        .ThenBy(u => u.FullName)
+        .Take(take)
+        .Select(u => new { u.FullName, u.Points })
+        .ToListAsync();
+
+    var totalUsers = await db.Users.AsNoTracking().CountAsync();
+
+    var entries = new List<LeaderboardEntryResponse>(users.Count);
+    var currentRank = 0;
+    int? lastPoints = null;
+    foreach (var user in users)
+    {
+        if (lastPoints is null || user.Points != lastPoints.Value)
+        {
+            currentRank++;
+            lastPoints = user.Points;
+        }
+
+        var name = (user.FullName ?? "").Trim();
+        var firstName = string.IsNullOrWhiteSpace(name) ? "Anonymous" : name.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
+        var status = gamification.GetStatus(user.Points);
+
+        entries.Add(new LeaderboardEntryResponse(
+            currentRank,
+            firstName,
+            status.Points,
+            status.Level,
+            status.LevelName));
+    }
+
+    return Results.Ok(new LeaderboardResponse(totalUsers, entries));
 }).RequireAuthorization();
 
 app.Run();

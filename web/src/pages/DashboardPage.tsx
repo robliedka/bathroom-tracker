@@ -4,6 +4,7 @@ import { api } from "../lib/api";
 import { authStore } from "../lib/auth";
 import { createHubConnection } from "../lib/signalr";
 import { BathroomTile } from "../components/BathroomTile";
+import { Link } from "react-router-dom";
 
 type Toast = {
   id: number;
@@ -39,12 +40,21 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
     new Map(),
   );
 
-  const firstFour = useMemo(() => bathrooms.slice(0, 4), [bathrooms]);
   const firstName = useMemo(() => {
     const raw = (name ?? authStore.getName() ?? "").trim();
     if (!raw) return null;
     return raw.split(/\s+/)[0] ?? null;
   }, [name]);
+  const isAdmin = authStore
+    .getRoles()
+    .map((r) => r.toLowerCase())
+    .includes("admin");
+
+  useEffect(() => {
+    if (!isAdmin && createOpen) {
+      setCreateOpen(false);
+    }
+  }, [isAdmin, createOpen]);
 
   function toast(text: string) {
     const id = Date.now() + Math.floor(Math.random() * 1000);
@@ -280,17 +290,19 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
           </div>
         </div>
         <div className="dashboard-head-actions">
-          <button
-            className="header-create-btn"
-            onClick={() => setCreateOpen(true)}
-          >
-            Create Bathroom
-          </button>
+          {isAdmin && (
+            <button
+              className="header-create-btn"
+              onClick={() => setCreateOpen(true)}
+            >
+              Create Bathroom
+            </button>
+          )}
         </div>
       </header>
 
       <section className="tile-grid">
-        {firstFour.map((bathroom) => (
+        {bathrooms.map((bathroom) => (
           <BathroomTile
             key={bathroom.id}
             bathroom={bathroom}
@@ -298,18 +310,10 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
             onToggleSubscription={toggleSubscription}
             onViewReports={getRecentReports}
             onDelete={requestDeleteBathroom}
+            canManage={isAdmin}
           />
         ))}
       </section>
-
-      {bathrooms.length > 4 && (
-        <section className="overflow-note">
-          <p>
-            Showing first 4 bathrooms on dashboard. {bathrooms.length - 4}{" "}
-            additional bathrooms are in the system.
-          </p>
-        </section>
-      )}
 
       <aside className="toasts">
         {toasts.map((item) => (
@@ -424,6 +428,14 @@ export function DashboardPage({ token, name, onSignOut }: Props) {
         {settingsOpen && (
           <div className="settings-panel" role="dialog" aria-label="Settings">
             <div className="settings-title">Settings</div>
+            <Link className="settings-item" to="/leaderboard" onClick={() => setSettingsOpen(false)}>
+              Leaderboard
+            </Link>
+            {isAdmin && (
+              <Link className="settings-item" to="/admin" onClick={() => setSettingsOpen(false)}>
+                Admin console
+              </Link>
+            )}
             <button
               className="settings-item"
               onClick={() => {

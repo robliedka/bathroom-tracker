@@ -8,9 +8,10 @@ type Props = {
   onToggleSubscription: (bathroomId: string, subscribe: boolean) => Promise<void>;
   onViewReports: (bathroomId: string) => Promise<BathroomReport[]>;
   onDelete: (bathroomId: string) => Promise<void>;
+  canManage: boolean;
 };
 
-export function BathroomTile({ bathroom, onReport, onToggleSubscription, onViewReports, onDelete }: Props) {
+export function BathroomTile({ bathroom, onReport, onToggleSubscription, onViewReports, onDelete, canManage }: Props) {
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
@@ -150,14 +151,16 @@ export function BathroomTile({ bathroom, onReport, onToggleSubscription, onViewR
           >
             {bathroom.isSubscribed ? 'Unsubscribe' : 'Subscribe'}
           </button>
-          <button
-            disabled={busy}
-            onClick={() => onDelete(bathroom.id)}
-            className="danger-btn"
-            title="Delete bathroom"
-          >
-            Delete
-          </button>
+          {canManage && (
+            <button
+              disabled={busy}
+              onClick={() => onDelete(bathroom.id)}
+              className="danger-btn"
+              title="Delete bathroom"
+            >
+              Delete
+            </button>
+          )}
         </div>
         <small>Updated {new Date(bathroom.lastUpdatedUtc).toLocaleTimeString()}</small>
       </footer>

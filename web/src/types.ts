@@ -2,6 +2,7 @@ export type AuthResponse = {
   accessToken: string;
   name: string;
   email: string;
+  roles: string[];
 };
 
 export type HourlyPoint = {
@@ -37,4 +38,25 @@ export type GamificationMe = {
   nextLevelPoints: number;
   rank: number;
   totalUsers: number;
+};
+
+export type LeaderboardEntry = {
+  rank: number;
+  name: string;
+  points: number;
+  level: number;
+  levelName: string;
+};
+
+export type LeaderboardResponse = {
+  totalUsers: number;
+  entries: LeaderboardEntry[];
+};
+
+export type AdminUser = {
+  id: string;
+  email: string;
+  name: string;
+  points: number;
+  roles: string[];
 };

@@ -1,8 +1,10 @@
 import type {
+  AdminUser,
   AuthResponse,
   BathroomReport,
   BathroomSummary,
   GamificationMe,
+  LeaderboardResponse,
 } from "../types";
 
 const API_BASE =
@@ -29,6 +31,16 @@ async function request<T>(
 
   if (!response.ok) {
     const text = await response.text();
+    if (text) {
+      try {
+        const parsed = JSON.parse(text) as { message?: string };
+        if (parsed?.message) {
+          throw new Error(parsed.message);
+        }
+      } catch {
+        // Not JSON.
+      }
+    }
     throw new Error(text || `Request failed: ${response.status}`);
   }
 
@@ -53,10 +65,31 @@ export const api = {
     });
   },
   me(token: string) {
-    return request<{ name: string; email: string }>("/api/me", {}, token);
+    return request<{ name: string; email: string; roles: string[] }>(
+      "/api/me",
+      {},
+      token,
+    );
   },
   gamificationMe(token: string) {
     return request<GamificationMe>("/api/gamification/me", {}, token);
+  },
+  gamificationLeaderboard(token: string, take = 25) {
+    return request<LeaderboardResponse>(
+      `/api/gamification/leaderboard?take=${take}`,
+      {},
+      token,
+    );
+  },
+  adminListUsers(token: string) {
+    return request<AdminUser[]>("/api/admin/users", {}, token);
+  },
+  adminSetUserRole(token: string, userId: string, role: "standard" | "admin") {
+    return request<void>(
+      `/api/admin/users/${userId}`,
+      { method: "PUT", body: JSON.stringify({ role }) },
+      token,
+    );
   },
   getBathrooms(token: string) {
     return request<BathroomSummary[]>("/api/bathrooms", {}, token);

@@ -696,6 +696,12 @@ button.ghost {
   margin-bottom: 0.45rem;
 }
 
+.settings-item:link,
+.settings-item:visited {
+  text-decoration: none;
+  display: block;
+}
+
 .settings-item:hover {
   border-color: rgba(255, 138, 42, 0.95);
   background: rgba(255, 138, 42, 0.12);
@@ -710,6 +716,187 @@ button.ghost {
   background: rgba(240, 103, 103, 0.12);
 }
 
+.admin-shell {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.admin-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1rem;
+  background: linear-gradient(140deg, rgba(11, 15, 13, 0.9), rgba(7, 10, 8, 0.95));
+}
+
+.admin-head h1 {
+  margin: 0;
+}
+
+.admin-head p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.admin-error {
+  border: 1px solid rgba(240, 103, 103, 0.5);
+  background: rgba(240, 103, 103, 0.12);
+  color: rgba(255, 226, 204, 0.96);
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+}
+
+.admin-table {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(11, 15, 13, 0.7);
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: 2.1fr 1.4fr 0.7fr 0.8fr;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  border-top: 1px solid rgba(74, 43, 22, 0.55);
+  align-items: center;
+}
+
+.admin-row-head {
+  border-top: none;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 900;
+  background: rgba(5, 6, 7, 0.55);
+}
+
+.admin-email {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.92rem;
+}
+
+.admin-select {
+  width: 100%;
+  border: 1px solid rgba(74, 43, 22, 0.85);
+  background: rgba(5, 6, 7, 0.35);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+}
+
+.admin-select:disabled {
+  opacity: 0.65;
+}
+
+.leaderboard-shell {
+  width: min(980px, 100%);
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.leaderboard-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(140deg, #0b120e 0%, #070b09 65%, #050607 100%);
+  border-radius: 16px;
+  padding: 1.1rem;
+}
+
+.leaderboard-head h1 {
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.leaderboard-head p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.leaderboard-me {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.leaderboard-me span {
+  border: 1px solid rgba(255, 138, 42, 0.35);
+  color: rgba(255, 226, 204, 0.96);
+  background: rgba(255, 138, 42, 0.12);
+  border-radius: 999px;
+  padding: 0.24rem 0.62rem;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.leaderboard-error {
+  border: 1px solid rgba(240, 103, 103, 0.55);
+  background: rgba(240, 103, 103, 0.1);
+  border-radius: 12px;
+  padding: 0.8rem;
+}
+
+.leaderboard-table {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr) 120px 170px;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  border-top: 1px solid rgba(74, 43, 22, 0.7);
+  align-items: center;
+}
+
+.leaderboard-row:first-child {
+  border-top: none;
+}
+
+.leaderboard-row-head {
+  border-top: none;
+  background: rgba(255, 138, 42, 0.08);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: rgba(255, 226, 204, 0.92);
+}
+
+.leaderboard-rank {
+  font-weight: 900;
+  color: rgba(255, 176, 74, 0.96);
+}
+
+.leaderboard-name {
+  font-weight: 700;
+}
+
+.leaderboard-points {
+  font-variant-numeric: tabular-nums;
+}
+
+.leaderboard-level {
+  color: rgba(233, 247, 239, 0.92);
+}
+
 @media (max-width: 900px) {
   .tile-grid {
     grid-template-columns: 1fr;
@@ -718,5 +905,9 @@ button.ghost {
   .dashboard-head {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .leaderboard-row {
+    grid-template-columns: 90px minmax(0, 1fr) 90px 1fr;
   }
 }

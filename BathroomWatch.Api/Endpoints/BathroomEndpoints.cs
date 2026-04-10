@@ -18,9 +18,12 @@ public static class BathroomEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetBathrooms);
-        group.MapPost("/", CreateBathroom);
-        group.MapDelete("/{bathroomId:guid}", DeleteBathroom);
-        group.MapPost("/{bathroomId:guid}/reports", CreateReport);
+        group.MapPost("/", CreateBathroom)
+            .RequireAuthorization(policy => policy.RequireRole(AdminEndpoints.RoleAdmin));
+        group.MapDelete("/{bathroomId:guid}", DeleteBathroom)
+            .RequireAuthorization(policy => policy.RequireRole(AdminEndpoints.RoleAdmin));
+        group.MapPost("/{bathroomId:guid}/reports", CreateReport)
+            .RequireRateLimiting("reports");
         group.MapGet("/{bathroomId:guid}/reports", GetReports);
         group.MapPost("/{bathroomId:guid}/subscribe", Subscribe);
         group.MapDelete("/{bathroomId:guid}/subscribe", Unsubscribe);
@@ -119,14 +122,6 @@ public static class BathroomEndpoints
         if (bathroom is null)
         {
             return Results.NotFound();
-        }
-
-        // Simple safety rule:
-        // - user-created bathrooms can only be deleted by the creator
-        // - seeded/system bathrooms (CreatedByUserId == null) can be deleted by any authenticated user
-        if (!string.IsNullOrWhiteSpace(bathroom.CreatedByUserId) && bathroom.CreatedByUserId != userId)
-        {
-            return Results.Forbid();
         }
 
         var deletedBathroomName = bathroom.Name;
